@@ -23,7 +23,8 @@ export function prepareDocument(document: Document) {
   document.addEventListener(
     'focus',
     e => {
-      const el = e.target as Element
+      // Focus on elements in a shadow tree is retargeted to the shadow host.
+      const el = e.composedPath()[0] as Element
 
       prepareElement(el)
     },
@@ -43,7 +44,7 @@ export function prepareDocument(document: Document) {
   document.addEventListener(
     'blur',
     e => {
-      const el = e.target as HTMLInputElement
+      const el = e.composedPath()[0] as HTMLInputElement
       const initialValue = getInitialValue(el)
       if (initialValue !== undefined) {
         if (el.value !== initialValue) {
