@@ -264,6 +264,27 @@ test('keep track of value in UI for elements in shadow DOM', async () => {
   expect(getUIValue(element)).toBe('')
 })
 
+test('fall back to the event target when the composed path is empty', async () => {
+  const {element} = render<HTMLInputElement>(`<input/>`, {focus: false})
+  const onChange = mocks.fn()
+  element.addEventListener('change', onChange)
+
+  prepare(element)
+
+  // A synthetic event might not have a composed path.
+  const focusEvent = new FocusEvent('focus')
+  focusEvent.composedPath = () => []
+  element.dispatchEvent(focusEvent)
+
+  setUIValue(element, 'a')
+
+  const blurEvent = new FocusEvent('blur')
+  blurEvent.composedPath = () => []
+  element.dispatchEvent(blurEvent)
+
+  expect(onChange).toHaveBeenCalledTimes(1)
+})
+
 test('trigger `change` event for elements in shadow DOM', async () => {
   const host = document.createElement('div')
   const shadowRoot = host.attachShadow({mode: 'open'})
